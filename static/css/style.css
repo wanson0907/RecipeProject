@@ -381,3 +381,54 @@ a:hover { color: var(--green-dark); }
   padding: 0;
 }
 
+/* ==========================================================================
+   마이페이지 스타일 (My Page UI)
+   ========================================================================== */
+.mypage-avatar {
+  width: 58px;
+  height: 58px;
+  background: #e9ece4;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  border: 2px solid var(--line);
+}
+
+.mypage-stat-card {
+  text-align: center;
+  padding: 10px 4px;
+  background: #fbfcf9;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+.mypage-stat-card .stat-num {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+.mypage-stat-card .stat-label {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.mypage-nav-tabs .nav-link {
+  color: var(--muted);
+  font-weight: 600;
+  border-radius: 20px;
+  padding: 8px 18px;
+  font-size: 0.92rem;
+  transition: all 0.2s ease;
+}
+.mypage-nav-tabs .nav-link.active {
+  background-color: var(--green);
+  color: #fff;
+}
+.mypage-nav-tabs .nav-link:not(.active):hover {
+  background-color: #e9ece4;
+  color: var(--ink);
+}
+
+

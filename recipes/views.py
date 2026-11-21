@@ -152,3 +152,37 @@ def chatbot_api(request):
     result = ask_gemini_chef(message, history=history)
     return JsonResponse(result)
 
+
+@login_required
+def mypage(request):
+    """
+    로그인한 사용자의 마이페이지: 작성한 레시피, 좋아요한 레시피, 작성한 댓글 목록을 조회합니다.
+    """
+    user = request.user
+    my_recipes = (
+        Recipe.objects.filter(author=user)
+        .annotate(like_count=Count("likes"))
+        .order_by("-created_at")
+    )
+    liked_recipes = (
+        Recipe.objects.filter(likes__user=user)
+        .annotate(like_count=Count("likes"))
+        .order_by("-likes__id")
+    )
+    my_comments = (
+        Comment.objects.filter(author=user)
+        .select_related("recipe")
+        .order_by("-created_at")
+    )
+
+    context = {
+        "my_recipes": my_recipes,
+        "liked_recipes": liked_recipes,
+        "my_comments": my_comments,
+        "my_recipes_count": my_recipes.count(),
+        "liked_recipes_count": liked_recipes.count(),
+        "my_comments_count": my_comments.count(),
+    }
+    return render(request, "recipes/mypage.html", context)
+
+

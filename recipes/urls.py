@@ -12,5 +12,6 @@ urlpatterns = [
     path("comments/<int:pk>/delete/", views.comment_delete, name="comment_delete"),
     path("recipes/<int:pk>/like/", views.like_toggle, name="like_toggle"),
     path("api/chatbot/", views.chatbot_api, name="chatbot_api"),
+    path("mypage/", views.mypage, name="mypage"),
     path("signup/", views.signup, name="signup"),
 ]

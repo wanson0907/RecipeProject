@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}마이페이지 - 레시피 공유{% endblock %}
+
+{% block content %}
+<div class="mypage-container">
+  <!-- 사용자 프로필 헤더 카드 -->
+  <div class="panel mb-4 mypage-profile-card">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div class="d-flex align-items-center gap-3">
+        <div class="mypage-avatar">🧑‍🍳</div>
+        <div>
+          <h1 class="h3 fw-bold mb-1">{{ user.username }} 님의 주방</h1>
+          <div class="text-muted small">
+            가입일: {{ user.date_joined|date:"Y년 n월 j일" }}
+            {% if user.email %} · 이메일: {{ user.email }}{% endif %}
+          </div>
+        </div>
+      </div>
+      <div>
+        <a href="{% url 'recipe_create' %}" class="btn btn-main btn-sm">+ 새 레시피 작성</a>
+      </div>
+    </div>
+
+    <!-- 통계 요약 3단 카드 -->
+    <div class="row g-2 mt-3 pt-3 border-top">
+      <div class="col-4">
+        <div class="mypage-stat-card">
+          <div class="stat-num text-success">{{ my_recipes_count }}</div>
+          <div class="stat-label">내가 쓴 레시피</div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="mypage-stat-card">
+          <div class="stat-num text-danger">{{ liked_recipes_count }}</div>
+          <div class="stat-label">좋아요한 레시피</div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="mypage-stat-card">
+          <div class="stat-num text-primary">{{ my_comments_count }}</div>
+          <div class="stat-label">작성한 댓글</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 탭 메뉴 (내가 쓴 레시피 / 좋아요한 레시피 / 작성 댓글) -->
+  <ul class="nav nav-pills mypage-nav-tabs mb-4" id="mypageTab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="recipes-tab" data-bs-toggle="pill" data-bs-target="#recipes-content" type="button" role="tab" aria-controls="recipes-content" aria-selected="true">
+        🍳 내가 쓴 레시피 <span class="badge bg-secondary ms-1">{{ my_recipes_count }}</span>
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="likes-tab" data-bs-toggle="pill" data-bs-target="#likes-content" type="button" role="tab" aria-controls="likes-content" aria-selected="false">
+        ❤️ 좋아요한 레시피 <span class="badge bg-secondary ms-1">{{ liked_recipes_count }}</span>
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="comments-tab" data-bs-toggle="pill" data-bs-target="#comments-content" type="button" role="tab" aria-controls="comments-content" aria-selected="false">
+        💬 작성한 댓글 <span class="badge bg-secondary ms-1">{{ my_comments_count }}</span>
+      </button>
+    </li>
+  </ul>
+
+  <!-- 탭 콘텐츠 내용 -->
+  <div class="tab-content" id="mypageTabContent">
+    <!-- 탭 1: 내가 쓴 레시피 -->
+    <div class="tab-pane fade show active" id="recipes-content" role="tabpanel" aria-labelledby="recipes-tab">
+      {% if my_recipes %}
+        <div class="row g-3">
+          {% for recipe in my_recipes %}
+          <div class="col-12 col-sm-6 col-lg-4">
+            <div class="recipe-card position-relative">
+              <a href="{{ recipe.get_absolute_url }}" class="text-decoration-none text-dark">
+                {% if recipe.image %}
+                  <img class="thumb" src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
+                {% else %}
+                  <div class="thumb-empty">사진 없음</div>
+                {% endif %}
+                <div class="body pb-2">
+                  <h2>{{ recipe.title }}</h2>
+                  <div class="meta">{{ recipe.created_at|date:"Y.m.d" }} · 추천 {{ recipe.like_count }}</div>
+                  {% if recipe.description %}
+                    <p class="text-muted small mt-1 mb-0 text-truncate">{{ recipe.description }}</p>
+                  {% endif %}
+                </div>
+              </a>
+              <div class="d-flex justify-content-end gap-1 px-3 pb-3 border-0 bg-transparent">
+                <a href="{% url 'recipe_update' recipe.pk %}" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 0.8rem;">수정</a>
+                <a href="{% url 'recipe_delete' recipe.pk %}" class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size: 0.8rem;">삭제</a>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="panel text-center py-5">
+          <div class="fs-1 mb-2">🍳</div>
+          <h2 class="h5 fw-bold">아직 작성한 레시피가 없습니다.</h2>
+          <p class="text-muted small mb-3">나만의 맛있는 요리 비법을 다른 사람들과 공유해 보세요!</p>
+          <a href="{% url 'recipe_create' %}" class="btn btn-main btn-sm">+ 첫 레시피 작성하기</a>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- 탭 2: 좋아요한 레시피 -->
+    <div class="tab-pane fade" id="likes-content" role="tabpanel" aria-labelledby="likes-tab">
+      {% if liked_recipes %}
+        <div class="row g-3">
+          {% for recipe in liked_recipes %}
+          <div class="col-12 col-sm-6 col-lg-4">
+            <a class="recipe-card" href="{{ recipe.get_absolute_url }}">
+              {% if recipe.image %}
+                <img class="thumb" src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
+              {% else %}
+                <div class="thumb-empty">사진 없음</div>
+              {% endif %}
+              <div class="body">
+                <h2>{{ recipe.title }}</h2>
+                <div class="meta">{{ recipe.author.username }} · 추천 {{ recipe.like_count }}</div>
+                {% if recipe.description %}
+                  <p class="text-muted small mt-1 mb-0 text-truncate">{{ recipe.description }}</p>
+                {% endif %}
+              </div>
+            </a>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="panel text-center py-5">
+          <div class="fs-1 mb-2">❤️</div>
+          <h2 class="h5 fw-bold">아직 좋아요를 누른 레시피가 없습니다.</h2>
+          <p class="text-muted small mb-3">마음에 드는 요리 레시피에 하트를 눌러 여기에 모아보세요!</p>
+          <a href="{% url 'recipe_list' %}" class="btn btn-outline-secondary btn-sm">레시피 둘러보기</a>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- 탭 3: 작성한 댓글 -->
+    <div class="tab-pane fade" id="comments-content" role="tabpanel" aria-labelledby="comments-tab">
+      {% if my_comments %}
+        <div class="panel p-0 overflow-hidden">
+          <ul class="list-group list-group-flush">
+            {% for comment in my_comments %}
+            <li class="list-group-item p-3">
+              <div class="d-flex justify-content-between align-items-baseline mb-1">
+                <a href="{{ comment.recipe.get_absolute_url }}" class="fw-bold text-decoration-none">
+                  🍲 {{ comment.recipe.title }}
+                </a>
+                <span class="text-muted small">{{ comment.created_at|date:"Y.m.d H:i" }}</span>
+              </div>
+              <p class="mb-0 text-dark small" style="white-space: pre-wrap;">{{ comment.content }}</p>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% else %}
+        <div class="panel text-center py-5">
+          <div class="fs-1 mb-2">💬</div>
+          <h2 class="h5 fw-bold">아직 작성한 댓글이 없습니다.</h2>
+          <p class="text-muted small mb-3">맛있어 보이는 레시피에 따뜻한 응원의 한마디를 남겨보세요!</p>
+          <a href="{% url 'recipe_list' %}" class="btn btn-outline-secondary btn-sm">레시피 둘러보기</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
