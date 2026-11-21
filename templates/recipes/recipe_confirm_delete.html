@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}레시피 삭제{% endblock %}
+{% block content %}
+<div class="mx-auto panel" style="max-width: 520px;">
+  <h1 class="h4 mb-3">레시피를 삭제할까요?</h1>
+  <p>"{{ object.title }}"와 달린 댓글, 추천이 모두 사라지고 되돌릴 수 없어요.</p>
+  <form method="post" class="d-flex gap-2">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">삭제</button>
+    <a class="btn btn-outline-secondary" href="{{ object.get_absolute_url }}">취소</a>
+  </form>
+</div>
+{% endblock %}

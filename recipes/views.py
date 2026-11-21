@@ -1,0 +1,154 @@
+import json
+from django.contrib import messages
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Count, Q
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
+from django.views.decorators.http import require_POST
+from django.views.generic import CreateView, DeleteView, ListView, UpdateView
+
+from .forms import CommentForm, RecipeForm, SignupForm
+from .models import Comment, Like, Recipe
+from .services import ask_gemini_chef
+
+
+class RecipeListView(ListView):
+    model = Recipe
+    template_name = "recipes/recipe_list.html"
+    context_object_name = "recipes"
+    paginate_by = 9
+
+    def get_queryset(self):
+        qs = Recipe.objects.select_related("author").annotate(like_count=Count("likes"))
+        q = self.request.GET.get("q", "").strip()
+        if q:
+            qs = qs.filter(
+                Q(title__icontains=q)
+                | Q(ingredients__icontains=q)
+                | Q(description__icontains=q)
+            )
+        if self.request.GET.get("sort") == "popular":
+            return qs.order_by("-like_count", "-created_at")
+        return qs.order_by("-created_at")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["q"] = self.request.GET.get("q", "")
+        ctx["sort"] = self.request.GET.get("sort", "")
+        return ctx
+
+
+def recipe_detail(request, pk):
+    recipe = get_object_or_404(Recipe.objects.select_related("author"), pk=pk)
+    liked = (
+        request.user.is_authenticated
+        and recipe.likes.filter(user=request.user).exists()
+    )
+    return render(
+        request,
+        "recipes/recipe_detail.html",
+        {
+            "recipe": recipe,
+            "comments": recipe.comments.select_related("author"),
+            "comment_form": CommentForm(),
+            "like_count": recipe.likes.count(),
+            "liked": liked,
+        },
+    )
+
+
+class RecipeCreateView(LoginRequiredMixin, CreateView):
+    model = Recipe
+    form_class = RecipeForm
+    template_name = "recipes/recipe_form.html"
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+
+
+class AuthorRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
+    def test_func(self):
+        return self.get_object().author == self.request.user
+
+
+class RecipeUpdateView(AuthorRequiredMixin, UpdateView):
+    model = Recipe
+    form_class = RecipeForm
+    template_name = "recipes/recipe_form.html"
+
+
+class RecipeDeleteView(AuthorRequiredMixin, DeleteView):
+    model = Recipe
+    template_name = "recipes/recipe_confirm_delete.html"
+    success_url = reverse_lazy("recipe_list")
+
+
+@login_required
+@require_POST
+def comment_create(request, pk):
+    recipe = get_object_or_404(Recipe, pk=pk)
+    form = CommentForm(request.POST)
+    if form.is_valid():
+        comment = form.save(commit=False)
+        comment.recipe = recipe
+        comment.author = request.user
+        comment.save()
+    else:
+        messages.error(request, "댓글 내용을 입력해주세요.")
+    return redirect("recipe_detail", pk=pk)
+
+
+@login_required
+@require_POST
+def comment_delete(request, pk):
+    comment = get_object_or_404(Comment, pk=pk, author=request.user)
+    recipe_pk = comment.recipe_id
+    comment.delete()
+    return redirect("recipe_detail", pk=recipe_pk)
+
+
+@login_required
+@require_POST
+def like_toggle(request, pk):
+    recipe = get_object_or_404(Recipe, pk=pk)
+    like, created = Like.objects.get_or_create(recipe=recipe, user=request.user)
+    if not created:
+        like.delete()
+    return redirect("recipe_detail", pk=pk)
+
+
+def signup(request):
+    if request.method == "POST":
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect("recipe_list")
+    else:
+        form = SignupForm()
+    return render(request, "registration/signup.html", {"form": form})
+
+
+@require_POST
+def chatbot_api(request):
+    """
+    사용자의 메시지를 받아 Gemini API를 통해 음식 및 레시피를 추천해주는 API 엔드포인트입니다.
+    """
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({"error": "잘못된 JSON 형식입니다."}, status=400)
+
+    message = data.get("message", "").strip()
+    history = data.get("history", [])
+
+    if not message:
+        return JsonResponse({"error": "메시지를 입력해주세요."}, status=400)
+
+    result = ask_gemini_chef(message, history=history)
+    return JsonResponse(result)
+

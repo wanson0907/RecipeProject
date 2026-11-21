@@ -1,0 +1,383 @@
+:root {
+  --bg: #f6f7f3;
+  --ink: #1d2420;
+  --muted: #66706a;
+  --green: #1f5b3f;
+  --green-dark: #163f2c;
+  --tomato: #d8452f;
+  --line: #dfe3da;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Pretendard", -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.65;
+}
+
+a { color: var(--green); }
+a:hover { color: var(--green-dark); }
+
+.site-nav { background: var(--green); }
+.site-nav .navbar-brand { font-weight: 800; letter-spacing: -0.02em; color: #fff; }
+.site-nav .nav-link, .site-nav .btn-link { color: rgba(255, 255, 255, .85); }
+.site-nav .nav-link:hover, .site-nav .btn-link:hover { color: #fff; }
+
+.btn-main { background: var(--green); border-color: var(--green); color: #fff; }
+.btn-main:hover { background: var(--green-dark); border-color: var(--green-dark); color: #fff; }
+
+.page-title { font-weight: 800; letter-spacing: -0.03em; }
+
+.recipe-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+}
+.recipe-card:hover { border-color: var(--green); color: inherit; }
+.recipe-card .thumb { aspect-ratio: 4 / 3; object-fit: cover; width: 100%; background: #e9ece4; }
+.recipe-card .thumb-empty {
+  aspect-ratio: 4 / 3; display: flex; align-items: center; justify-content: center;
+  background: #e9ece4; color: var(--muted); font-size: .9rem;
+}
+.recipe-card .body { padding: 14px 16px 16px; }
+.recipe-card h2 { font-size: 1.1rem; font-weight: 700; margin: 0 0 4px; }
+.recipe-card .meta { color: var(--muted); font-size: .85rem; }
+
+.hero-img { width: 100%; max-height: 420px; object-fit: cover; border-radius: 10px; }
+
+.panel { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 20px 22px; }
+.ingredient-list { list-style: none; padding: 0; margin: 0; }
+.ingredient-list li { padding: 6px 0; border-bottom: 1px dashed var(--line); }
+.ingredient-list li:last-child { border-bottom: 0; }
+.step-list { padding-left: 1.2rem; }
+.step-list li { padding: 6px 0 6px 4px; }
+.step-list li::marker { color: var(--tomato); font-weight: 700; }
+
+.like-btn { border: 1px solid var(--tomato); color: var(--tomato); background: #fff; }
+.like-btn.active, .like-btn:hover { background: var(--tomato); color: #fff; }
+
+.comment { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.comment:last-child { border-bottom: 0; }
+.comment .who { font-weight: 700; font-size: .9rem; }
+.comment .when { color: var(--muted); font-size: .8rem; margin-left: 6px; }
+
+.form-label { font-weight: 600; }
+.form-text, .helptext { color: var(--muted); font-size: .85rem; }
+.errorlist { color: var(--tomato); list-style: none; padding: 0; margin: 4px 0 0; font-size: .9rem; }
+
+/* ==========================================================================
+   AI 음식 추천 챗봇 스타일 (Chatbot Widget)
+   ========================================================================== */
+#recipe-chatbot-root {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1050;
+  font-family: inherit;
+}
+
+/* 플로팅 버튼 */
+.chatbot-floating-btn {
+  background: var(--green);
+  color: #fff;
+  border: none;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 16px rgba(31, 91, 63, 0.35);
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+.chatbot-floating-btn:hover {
+  background: var(--green-dark);
+  transform: scale(1.06);
+  box-shadow: 0 8px 22px rgba(31, 91, 63, 0.45);
+}
+.chatbot-floating-btn .chatbot-icon {
+  font-size: 1.85rem;
+  line-height: 1;
+}
+.chatbot-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--tomato);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 12px;
+  border: 2px solid #fff;
+  white-space: nowrap;
+}
+
+/* 챗봇 윈도우 */
+.chatbot-window {
+  position: absolute;
+  bottom: 74px;
+  right: 0;
+  width: 380px;
+  height: 560px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 120px);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.16);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: chatbotFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes chatbotFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 챗봇 헤더 */
+.chatbot-header {
+  background: var(--green);
+  color: #fff;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.chatbot-avatar {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+.chatbot-title {
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+.chatbot-subtitle {
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+/* 추천 질문 칩 바 */
+.chatbot-chips-container {
+  display: flex;
+  gap: 6px;
+  padding: 10px 14px;
+  background: #fafbf9;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: thin;
+}
+.chatbot-chips-container::-webkit-scrollbar {
+  height: 4px;
+}
+.chatbot-chips-container::-webkit-scrollbar-thumb {
+  background: #cbd3cb;
+  border-radius: 4px;
+}
+.chatbot-chip {
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 0.78rem;
+  padding: 4px 10px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+.chatbot-chip:hover {
+  background: #edf3ef;
+  border-color: var(--green);
+  color: var(--green);
+}
+
+/* 메시지 스크롤 영역 */
+.chatbot-messages {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: #fbfcf9;
+}
+.chat-msg {
+  display: flex;
+  gap: 10px;
+  max-width: 88%;
+}
+.chat-msg-user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+.chat-msg-bot {
+  align-self: flex-start;
+}
+.chat-msg-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e9ece4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.chat-msg-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chat-bubble {
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  word-break: break-word;
+}
+.chat-msg-bot .chat-bubble {
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-top-left-radius: 4px;
+}
+.chat-msg-user .chat-bubble {
+  background: var(--green);
+  color: #fff;
+  border-top-right-radius: 4px;
+}
+
+/* 추천 레시피 카드 목록 */
+.chatbot-recipe-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+.chatbot-recipe-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+.chatbot-recipe-card:hover {
+  border-color: var(--green);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  color: inherit;
+}
+.chatbot-card-thumb {
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.chatbot-card-thumb-empty {
+  width: 52px;
+  height: 52px;
+  background: #edf0ea;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.chatbot-card-info {
+  flex: 1;
+  min-width: 0;
+}
+.chatbot-card-tag {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--tomato);
+  margin-bottom: 2px;
+}
+.chatbot-card-title {
+  font-weight: 700;
+  font-size: 0.86rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chatbot-card-desc {
+  font-size: 0.74rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 로딩 인디케이터 */
+.chatbot-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  background: #f0f4ef;
+  border-top: 1px solid var(--line);
+}
+
+/* 입력창 바 */
+.chatbot-input-bar {
+  display: flex;
+  gap: 8px;
+  padding: 12px 14px;
+  background: #fff;
+  border-top: 1px solid var(--line);
+}
+.chatbot-input-bar input {
+  font-size: 0.9rem;
+  border-radius: 20px;
+  padding: 8px 14px;
+}
+.chatbot-input-bar input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 0.2rem rgba(31, 91, 63, 0.15);
+}
+.chatbot-input-bar button {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+}
+

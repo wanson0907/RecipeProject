@@ -1,0 +1,65 @@
+<div id="recipe-chatbot-root">
+  <!-- 플로팅 토글 버튼 -->
+  <button id="chatbot-toggle-btn" class="chatbot-floating-btn" type="button" aria-label="음식 추천 챗봇 열기">
+    <span class="chatbot-icon">🧑‍🍳</span>
+    <span class="chatbot-badge">AI 추천</span>
+  </button>
+
+  <!-- 챗봇 대화창 창 -->
+  <div id="chatbot-window" class="chatbot-window d-none" aria-live="polite">
+    <!-- 챗봇 헤더 -->
+    <div class="chatbot-header">
+      <div class="d-flex align-items-center gap-2">
+        <div class="chatbot-avatar">🍳</div>
+        <div>
+          <div class="chatbot-title">맛비서 AI 셰프</div>
+          <div class="chatbot-subtitle">Google Gemini 음식 추천</div>
+        </div>
+      </div>
+      <button id="chatbot-close-btn" type="button" class="btn-close btn-close-white" aria-label="닫기"></button>
+    </div>
+
+    <!-- 추천 질문 칩 바 -->
+    <div class="chatbot-chips-container">
+      <button type="button" class="chatbot-chip" data-query="냉장고에 계란과 양파가 있어. 뭐 만들까?">🍳 계란·양파 요리</button>
+      <button type="button" class="chatbot-chip" data-query="15분 만에 만들 수 있는 초간단 요리 추천해줘!">⚡ 초간단 요리</button>
+      <button type="button" class="chatbot-chip" data-query="오늘 칼칼하고 얼큰한 국물 요리 추천해줘!">🍲 칼칼한 국물</button>
+      <button type="button" class="chatbot-chip" data-query="칼로리 부담 없는 건강한 다이어트 요리 알려줘!">🥗 다이어트 식단</button>
+    </div>
+
+    <!-- 대화 메시지 목록 -->
+    <div id="chatbot-messages" class="chatbot-messages">
+      <div class="chat-msg chat-msg-bot">
+        <div class="chat-msg-avatar">🧑‍🍳</div>
+        <div class="chat-msg-content">
+          <p class="mb-1">안녕하세요! 레시피 사이트의 인공지능 요리사 <strong>맛비서</strong>입니다.</p>
+          <p class="mb-0 text-muted small">가지고 계신 재료나 오늘 먹고 싶은 음식의 느낌을 편하게 말씀해 주세요! 우리 사이트에 등록된 맛있는 레시피도 함께 찾아드릴게요. ✨</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 로딩 인디케이터 -->
+    <div id="chatbot-loading" class="chatbot-loading d-none">
+      <div class="spinner-grow spinner-grow-sm text-success" role="status"></div>
+      <span>맛비서가 맛있는 레시피를 생각하고 있어요...</span>
+    </div>
+
+    <!-- 입력 폼 -->
+    <form id="chatbot-form" class="chatbot-input-bar">
+      {% csrf_token %}
+      <input
+        type="text"
+        id="chatbot-input"
+        class="form-control"
+        placeholder="예: 돼지고기랑 김치로 뭐 할까?"
+        autocomplete="off"
+        maxlength="300"
+      />
+      <button type="submit" id="chatbot-send-btn" class="btn btn-main" aria-label="메시지 전송">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576 6.636 10.07Zm-1.282-.676L13.424 1.87 2.458 6.278l2.896 3.116Z"/>
+        </svg>
+      </button>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}{{ recipe.title }}{% endblock %}
+{% block content %}
+<div class="mx-auto" style="max-width: 820px;">
+  <h1 class="page-title h2">{{ recipe.title }}</h1>
+  <p class="text-muted mb-3">{{ recipe.author.username }} · {{ recipe.created_at|date:"Y.m.d" }}</p>
+  {% if recipe.description %}<p class="fs-5">{{ recipe.description }}</p>{% endif %}
+
+  {% if recipe.image %}
+    <img class="hero-img mb-4" src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
+  {% endif %}
+
+  <div class="d-flex flex-wrap gap-2 mb-4">
+    {% if user.is_authenticated %}
+      <form method="post" action="{% url 'like_toggle' recipe.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn like-btn {% if liked %}active{% endif %}">
+          {% if liked %}추천 취소{% else %}추천{% endif %} {{ like_count }}
+        </button>
+      </form>
+    {% else %}
+      <a class="btn like-btn" href="{% url 'login' %}?next={{ request.path }}">추천 {{ like_count }}</a>
+    {% endif %}
+
+    {% if user == recipe.author %}
+      <a class="btn btn-outline-secondary" href="{% url 'recipe_update' recipe.pk %}">수정</a>
+      <a class="btn btn-outline-danger" href="{% url 'recipe_delete' recipe.pk %}">삭제</a>
+    {% endif %}
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-5">
+      <section class="panel h-100">
+        <h2 class="h5 mb-3">재료</h2>
+        <ul class="ingredient-list">
+          {% for item in recipe.ingredient_list %}<li>{{ item }}</li>{% endfor %}
+        </ul>
+      </section>
+    </div>
+    <div class="col-md-7">
+      <section class="panel h-100">
+        <h2 class="h5 mb-3">만드는 법</h2>
+        <ol class="step-list">
+          {% for step in recipe.step_list %}<li>{{ step }}</li>{% endfor %}
+        </ol>
+      </section>
+    </div>
+  </div>
+
+  <section class="panel">
+    <h2 class="h5 mb-3">댓글 {{ comments|length }}</h2>
+    {% for comment in comments %}
+      <div class="comment">
+        <div class="d-flex justify-content-between">
+          <div><span class="who">{{ comment.author.username }}</span><span class="when">{{ comment.created_at|date:"Y.m.d H:i" }}</span></div>
+          {% if user == comment.author %}
+            <form method="post" action="{% url 'comment_delete' comment.pk %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-link btn-sm text-danger p-0">삭제</button>
+            </form>
+          {% endif %}
+        </div>
+        <div>{{ comment.content|linebreaksbr }}</div>
+      </div>
+    {% empty %}
+      <p class="text-muted">첫 댓글을 남겨보세요.</p>
+    {% endfor %}
+
+    {% if user.is_authenticated %}
+      <form method="post" action="{% url 'comment_create' recipe.pk %}" class="mt-3">
+        {% csrf_token %}
+        {{ comment_form.content }}
+        <button type="submit" class="btn btn-main mt-2">댓글 등록</button>
+      </form>
+    {% else %}
+      <p class="mt-3 mb-0"><a href="{% url 'login' %}?next={{ request.path }}">로그인</a>하면 댓글을 쓸 수 있어요.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

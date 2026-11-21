@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}레시피 수정{% else %}레시피 쓰기{% endif %}{% endblock %}
+{% block content %}
+<div class="mx-auto" style="max-width: 720px;">
+  <h1 class="page-title h3 mb-3">{% if object %}레시피 수정{% else %}레시피 쓰기{% endif %}</h1>
+  <form method="post" enctype="multipart/form-data" class="panel">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+      <div class="mb-3">
+        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+        {{ field.errors }}
+      </div>
+    {% endfor %}
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-main">{% if object %}수정 완료{% else %}등록{% endif %}</button>
+      <a class="btn btn-outline-secondary" href="{% if object %}{{ object.get_absolute_url }}{% else %}{% url 'recipe_list' %}{% endif %}">취소</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
