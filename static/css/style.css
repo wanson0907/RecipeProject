@@ -463,3 +463,26 @@ a:hover { color: var(--green-dark); }
 .best-recipe-meta span:first-child { color: #e58a22; font-weight: 650; }
 @media (max-width: 991.98px) { .best-recipes-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 575.98px) { .best-recipes-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 12px; } .best-recipe-info h2 { font-size: .9rem; } }
+
+
+/* 챗봇 창 개선: 옆으로 스크롤되던 문제 수정 + PC에서 더 크게 */
+.chat-msg { min-width: 0; }
+.chat-msg-content { min-width: 0; }
+.chat-bubble { overflow-wrap: anywhere; }
+.chatbot-recipe-card { min-width: 0; }
+.chatbot-messages { overflow-x: hidden; }
+.chatbot-header-actions { display: flex; align-items: center; gap: 10px; }
+.chatbot-expand-btn {
+  display: none; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 8px;
+  background: rgba(255, 255, 255, .16); color: #fff; font-size: 1rem; line-height: 1; cursor: pointer;
+}
+.chatbot-expand-btn:hover { background: rgba(255, 255, 255, .3); }
+@media (min-width: 768px) {
+  .chatbot-window { width: 480px; height: 640px; max-height: calc(100vh - 110px); }
+  .chatbot-window .chat-bubble { font-size: .95rem; }
+  .chatbot-expand-btn { display: inline-flex; align-items: center; justify-content: center; }
+  .chatbot-window.chatbot-window-large { width: min(860px, calc(100vw - 48px)); height: calc(100vh - 110px); }
+  .chatbot-window.chatbot-window-large .chat-msg { max-width: 80%; }
+  .chatbot-window.chatbot-window-large .chat-bubble { font-size: 1rem; }
+}
+

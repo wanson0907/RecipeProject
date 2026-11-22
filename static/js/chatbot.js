@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const toggleBtn = document.getElementById("chatbot-toggle-btn");
   const closeBtn = document.getElementById("chatbot-close-btn");
+  const expandBtn = document.getElementById("chatbot-expand-btn");
   const chatbotWindow = document.getElementById("chatbot-window");
   const form = document.getElementById("chatbot-form");
   const input = document.getElementById("chatbot-input");
@@ -38,6 +39,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
   toggleBtn.addEventListener("click", () => toggleChatbot());
   closeBtn.addEventListener("click", () => toggleChatbot(false));
+
+  // 크게 보기 / 작게 보기 (PC 화면에서만 버튼이 보입니다)
+  if (expandBtn) {
+    expandBtn.addEventListener("click", () => {
+      const large = chatbotWindow.classList.toggle("chatbot-window-large");
+      expandBtn.textContent = large ? "⤡" : "⤢";
+      expandBtn.title = large ? "작게 보기" : "크게 보기";
+      expandBtn.setAttribute("aria-label", expandBtn.title);
+      scrollToBottom();
+    });
+  }
 
   // 칩 클릭 시 질문 자동 전송
   chips.forEach((chip) => {
