@@ -71,6 +71,16 @@ document.addEventListener("DOMContentLoaded", function () {
     return safe;
   }
 
+  // 화면에 넣기 전에 특수문자를 안전한 글자로 바꿉니다 (코드가 실행되지 않게 막는 보안 함수)
+  function esc(s) {
+    return String(s ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
   // 메시지 렌더링
   function appendMessage(sender, text, recipes = []) {
     const isUser = sender === "user";
@@ -109,15 +119,15 @@ document.addEventListener("DOMContentLoaded", function () {
         card.className = "chatbot-recipe-card";
 
         const thumbHtml = r.image_url
-          ? `<img src="${r.image_url}" alt="${r.title}" class="chatbot-card-thumb" />`
+          ? `<img src="${esc(r.image_url)}" alt="${esc(r.title)}" class="chatbot-card-thumb" />`
           : `<div class="chatbot-card-thumb-empty">🍳</div>`;
 
         card.innerHTML = `
           ${thumbHtml}
           <div class="chatbot-card-info">
             <span class="chatbot-card-tag">추천 레시피</span>
-            <div class="chatbot-card-title">${r.title}</div>
-            <div class="chatbot-card-desc">${r.description || "재료 보러가기"}</div>
+            <div class="chatbot-card-title">${esc(r.title)}</div>
+            <div class="chatbot-card-desc">${esc(r.description || "재료 보러가기")}</div>
           </div>
         `;
         cardContainer.appendChild(card);

@@ -1,4 +1,6 @@
 from django import forms
+from django.conf import settings
+from django.core.files.uploadedfile import UploadedFile
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
@@ -22,6 +24,16 @@ class RecipeForm(BootstrapMixin, forms.ModelForm):
             "ingredients": forms.Textarea(attrs={"rows": 6}),
             "steps": forms.Textarea(attrs={"rows": 8}),
         }
+
+    def clean_image(self):
+        """새로 올린 사진이 너무 크면 거절합니다. (기존 사진은 검사하지 않습니다)"""
+        image = self.cleaned_data.get("image")
+        max_mb = getattr(settings, "MAX_IMAGE_UPLOAD_MB", 5)
+        if isinstance(image, UploadedFile) and image.size > max_mb * 1024 * 1024:
+            raise forms.ValidationError(
+                f"사진은 {max_mb}MB 이하만 올릴 수 있어요. (지금 {image.size / 1024 / 1024:.1f}MB)"
+            )
+        return image
 
 
 class CommentForm(BootstrapMixin, forms.ModelForm):

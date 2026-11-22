@@ -123,9 +123,20 @@ if os.environ.get("DATABASE_URL"):
     DATABASES["default"] = dj_database_url.parse(os.environ["DATABASE_URL"], conn_max_age=600)
 
 AUTH_PASSWORD_VALIDATORS = [
+    # 아이디와 너무 비슷한 비밀번호 금지
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    # 8자 이상
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    # 흔한 비밀번호(123456, password 등) 금지
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    # 숫자로만 된 비밀번호 금지
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
+
+# 보안 설정값 (숫자만 바꾸면 됩니다)
+LOGIN_MAX_ATTEMPTS = 5      # 이 횟수만큼 연속 실패하면 로그인을 잠시 막습니다
+LOGIN_LOCK_SECONDS = 300    # 잠금 시간(초) = 5분
+MAX_IMAGE_UPLOAD_MB = 5     # 레시피 사진 최대 크기(MB)
 
 LANGUAGE_CODE = "ko-kr"
 TIME_ZONE = "Asia/Seoul"
