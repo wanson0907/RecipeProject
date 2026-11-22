@@ -1,5 +1,36 @@
 {% extends "base.html" %}
 {% block content %}
+{% if best_recipes %}
+<section class="best-recipes-section mb-5" aria-labelledby="best-recipes-title">
+  <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+      <h1 id="best-recipes-title" class="page-title h3 mb-1"><span class="best-title-accent">베스트</span> 레시피</h1>
+      <p class="text-muted small mb-0">추천을 가장 많이 받은 레시피 TOP 10</p>
+    </div>
+    <a class="best-more-link" href="?sort=popular">인기 레시피 더보기 <span aria-hidden="true">›</span></a>
+  </div>
+
+  <div class="best-recipes-grid">
+    {% for recipe in best_recipes %}
+    <a class="best-recipe-card" href="{{ recipe.get_absolute_url }}">
+      <div class="best-recipe-image-wrap">
+        {% if recipe.image %}
+          <img class="best-recipe-image" src="{{ recipe.image.url }}" alt="{{ recipe.title }}" loading="lazy">
+        {% else %}
+          <div class="best-recipe-image best-recipe-no-image">🍳</div>
+        {% endif %}
+        <span class="best-rank rank-{{ forloop.counter }}">{{ forloop.counter }}</span>
+      </div>
+      <div class="best-recipe-info">
+        <h2>{{ recipe.title }}</h2>
+        <div class="best-recipe-meta"><span>♥ {{ recipe.like_count }}</span><span>{{ recipe.author.username }}</span></div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
 <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
   <h1 class="page-title h3 mb-0">레시피</h1>
   <div class="btn-group btn-group-sm">

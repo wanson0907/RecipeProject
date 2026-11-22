@@ -40,6 +40,14 @@ class RecipeListView(ListView):
         ctx = super().get_context_data(**kwargs)
         ctx["q"] = self.request.GET.get("q", "")
         ctx["sort"] = self.request.GET.get("sort", "")
+        # 메인 화면 상단에 추천 수 기준 베스트 레시피 TOP 10을 노출합니다.
+        # 검색 중에도 전체 베스트 목록은 유지해 사이트의 인기 레시피를 보여줍니다.
+        ctx["best_recipes"] = (
+            Recipe.objects.select_related("author")
+            .annotate(like_count=Count("likes"))
+            .filter(like_count__gt=0)
+            .order_by("-like_count", "-created_at")[:10]
+        )
         return ctx
 
 
