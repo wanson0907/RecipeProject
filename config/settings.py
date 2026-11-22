@@ -58,10 +58,7 @@ INSTALLED_APPS = [
 ]
 
 if USE_CLOUDINARY:
-    # cloudinary_storage 는 staticfiles 보다 앞에 있어야 합니다.
-    INSTALLED_APPS.insert(INSTALLED_APPS.index("django.contrib.staticfiles"), "cloudinary_storage")
     INSTALLED_APPS.append("cloudinary")
-
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -138,7 +135,6 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"  
 
 MEDIA_URL = "media/"
@@ -152,5 +148,5 @@ LOGOUT_REDIRECT_URL = "recipe_list"
 
 # Google Gemini API 설정
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-1.5-flash")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash")
 
