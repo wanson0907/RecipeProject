@@ -13,7 +13,7 @@ python manage.py migrate
 
 # 초기 대표 레시피 데이터 적재
 python manage.py seed_recipes
-
+python manage.py shell -c "from recipes.models import Recipe; print(Recipe.objects.filter(title='고소한 알감자 조림').delete())"
 # recipe_images 폴더의 사진을 레시피에 연결 (폴더가 없으면 건너뜀, 이미 사진 있는 레시피도 건너뜀)
 python manage.py attach_images
 
