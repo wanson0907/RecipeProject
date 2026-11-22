@@ -18,6 +18,6 @@ python manage.py seed_recipes
 python manage.py attach_images
 
 # 관리자 계정 만들기: 환경변수 3개(USERNAME, EMAIL, PASSWORD)가 모두 있을 때만 (이미 있으면 무시)
-if [ -n "$DJANGO_SUPERUSER_USERNAME" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ] && [ -n "$DJANGO_SUPERUSER_EMAIL" ]; then
-  python manage.py createsuperuser --noinput || true
+if [ -n "$DJANGO_SUPERUSER_USERNAME" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; then
+  python manage.py shell -c "import os; from django.contrib.auth import get_user_model; U=get_user_model(); u,_=U.objects.get_or_create(username=os.environ['DJANGO_SUPERUSER_USERNAME']); u.is_staff=True; u.is_superuser=True; u.set_password(os.environ['DJANGO_SUPERUSER_PASSWORD']); u.save(); print('superuser ready:', u.username)"
 fi
