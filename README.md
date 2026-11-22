@@ -47,3 +47,5 @@ python manage.py runserver
      - `DJANGO_SECRET_KEY`: 임의의 긴 보안 문자열
      - `DEBUG`: `False`
 4. **Create Web Service** 클릭 시 2~3분 내 무료 라이브 웹사이트 완성!
+"# RecipeProject" 
+"# RecipeProject" 

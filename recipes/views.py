@@ -3,10 +3,12 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.core.cache import cache
 from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
@@ -133,11 +135,36 @@ def signup(request):
     return render(request, "registration/signup.html", {"form": form})
 
 
+# 한 사람이 하루에 챗봇에게 질문할 수 있는 최대 횟수
+CHATBOT_DAILY_LIMIT = 10
+
+
+def _use_chatbot_quota(user):
+    """
+    오늘 사용 횟수를 1 늘리고 (허용 여부, 남은 횟수)를 돌려줍니다.
+    날짜(한국 시간 기준)가 바뀌면 새 키가 만들어져서 자동으로 0부터 다시 시작합니다.
+    """
+    key = f"chatbot_count:{user.pk}:{timezone.localdate().isoformat()}"
+    cache.add(key, 0, timeout=60 * 60 * 24)  # 키가 없을 때만 0으로 만들기
+    count = cache.incr(key)
+    if count > CHATBOT_DAILY_LIMIT:
+        return False, 0
+    return True, CHATBOT_DAILY_LIMIT - count
+
+
 @require_POST
 def chatbot_api(request):
     """
     사용자의 메시지를 받아 Gemini API를 통해 음식 및 레시피를 추천해주는 API 엔드포인트입니다.
+    로그인한 사용자만 쓸 수 있고, 한 사람당 하루 CHATBOT_DAILY_LIMIT번까지 가능합니다.
     """
+    # 로그인 확인 (fetch 요청이라 로그인 페이지로 이동시키지 않고 JSON으로 안내합니다)
+    if not request.user.is_authenticated:
+        return JsonResponse(
+            {"error": "AI 셰프는 로그인한 회원만 이용할 수 있어요. 로그인 후 다시 질문해 주세요!"},
+            status=401,
+        )
+
     try:
         data = json.loads(request.body.decode("utf-8"))
     except (json.JSONDecodeError, UnicodeDecodeError):
@@ -149,7 +176,19 @@ def chatbot_api(request):
     if not message:
         return JsonResponse({"error": "메시지를 입력해주세요."}, status=400)
 
+    # 하루 횟수 제한 확인
+    allowed, remaining = _use_chatbot_quota(request.user)
+    if not allowed:
+        return JsonResponse(
+            {
+                "error": f"오늘 AI 셰프 질문 {CHATBOT_DAILY_LIMIT}회를 모두 사용했어요. "
+                "내일 다시 이용해 주세요! 그동안 사이트의 레시피를 직접 둘러보셔도 좋아요 🍳"
+            },
+            status=429,
+        )
+
     result = ask_gemini_chef(message, history=history)
+    result["remaining"] = remaining
     return JsonResponse(result)
 
 

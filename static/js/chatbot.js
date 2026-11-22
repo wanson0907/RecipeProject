@@ -168,7 +168,7 @@ document.addEventListener("DOMContentLoaded", function () {
         conversationHistory.push({ sender: "bot", text: data.reply });
       } else {
         const errMsg = data.error || "답변을 불러오지 못했습니다.";
-        appendMessage("bot", `⚠️ 오류: ${errMsg}`);
+        appendMessage("bot", `⚠️ ${errMsg}`);
       }
     } catch (err) {
       loadingIndicator.classList.add("d-none");
